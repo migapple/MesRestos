@@ -1,0 +1,70 @@
+PODS:
+  - Capacitor (6.2.1):
+    - CapacitorCordova
+  - CapacitorCamera (6.1.3):
+    - Capacitor
+  - CapacitorCordova (6.2.1)
+  - CapacitorFilesystem (6.0.0):
+    - Capacitor
+  - CapacitorGeolocation (6.1.1):
+    - Capacitor
+  - CapacitorHaptics (6.0.3):
+    - Capacitor
+  - CapacitorKeyboard (6.0.4):
+    - Capacitor
+  - CapacitorPreferences (6.0.4):
+    - Capacitor
+  - CapacitorShare (6.0.0):
+    - Capacitor
+  - CapacitorStatusBar (6.0.3):
+    - Capacitor
+
+DEPENDENCIES:
+  - "Capacitor (from `../../node_modules/@capacitor/ios`)"
+  - "CapacitorCamera (from `../../node_modules/@capacitor/camera`)"
+  - "CapacitorCordova (from `../../node_modules/@capacitor/ios`)"
+  - "CapacitorFilesystem (from `../../node_modules/@capacitor/filesystem`)"
+  - "CapacitorGeolocation (from `../../node_modules/@capacitor/geolocation`)"
+  - "CapacitorHaptics (from `../../node_modules/@capacitor/haptics`)"
+  - "CapacitorKeyboard (from `../../node_modules/@capacitor/keyboard`)"
+  - "CapacitorPreferences (from `../../node_modules/@capacitor/preferences`)"
+  - "CapacitorShare (from `../../node_modules/@capacitor/share`)"
+  - "CapacitorStatusBar (from `../../node_modules/@capacitor/status-bar`)"
+
+EXTERNAL SOURCES:
+  Capacitor:
+    :path: "../../node_modules/@capacitor/ios"
+  CapacitorCamera:
+    :path: "../../node_modules/@capacitor/camera"
+  CapacitorCordova:
+    :path: "../../node_modules/@capacitor/ios"
+  CapacitorFilesystem:
+    :path: "../../node_modules/@capacitor/filesystem"
+  CapacitorGeolocation:
+    :path: "../../node_modules/@capacitor/geolocation"
+  CapacitorHaptics:
+    :path: "../../node_modules/@capacitor/haptics"
+  CapacitorKeyboard:
+    :path: "../../node_modules/@capacitor/keyboard"
+  CapacitorPreferences:
+    :path: "../../node_modules/@capacitor/preferences"
+  CapacitorShare:
+    :path: "../../node_modules/@capacitor/share"
+  CapacitorStatusBar:
+    :path: "../../node_modules/@capacitor/status-bar"
+
+SPEC CHECKSUMS:
+  Capacitor: c95400d761e376be9da6be5a05f226c0e865cebf
+  CapacitorCamera: 5ba135b0cb55a788758139fa2404d726bf60f0f3
+  CapacitorCordova: 8d93e14982f440181be7304aa9559ca631d77fff
+  CapacitorFilesystem: 9c2cc1e89d3b8b91503b316e9f6c2915c9bf9419
+  CapacitorGeolocation: ef657a46a125be74010f4ce57caae173c23204d2
+  CapacitorHaptics: 40f83026feeee9cfe36e89e9c98a3baaaf20c450
+  CapacitorKeyboard: e8cd50fd5cbdd023a5947a5c0f5cca6e5aa5a253
+  CapacitorPreferences: 5848e0691b36b4bb4acc98e481ab56d451578d30
+  CapacitorShare: 785711ac46ecc2f98ac92525eb64bc78a665843d
+  CapacitorStatusBar: 149cde8f1328ec3aa6cbdd872a55137ae3f98b16
+
+PODFILE CHECKSUM: 9fd49ac1459608e68203474920756028fc7da404
+
+COCOAPODS: 1.16.2

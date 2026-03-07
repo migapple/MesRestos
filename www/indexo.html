@@ -1,0 +1,1360 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, interactive-widget=resizes-visual">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<title>MesRestos</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #faf6f0;
+    --bg2: #f2ebe0;
+    --card: #fffcf8;
+    --ink: #1e1712;
+    --ink2: #5a4e44;
+    --ink3: #9a8e84;
+    --accent: #c85d3a;
+    --accent2: #e07a55;
+    --gold: #c9963a;
+    --gold2: #e8b85a;
+    --green: #4a7c59;
+    --red: #c84040;
+    --border: #e5dcd0;
+    --shadow: rgba(30,23,18,0.08);
+    --shadow2: rgba(30,23,18,0.18);
+    --radius: 16px;
+    --radius-sm: 10px;
+    --safe-bottom: env(safe-area-inset-bottom, 0px);
+    --safe-top: env(safe-area-inset-top, 0px);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  html, body {
+    height: 100%;
+    max-height: 100%;
+    overflow: hidden;
+    position: fixed;
+    width: 100%;
+    max-width: 100vw;
+    left: 0;
+    right: 0;
+  }
+  body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--ink); overflow-x: hidden; }
+  
+  /* Empêche tout élément de dépasser la largeur de l'écran */
+  .drawer, .app-header, .bottom-nav, .main {
+    max-width: 100vw;
+    overflow-x: hidden;
+  }
+
+  /* ── HEADER ── */
+  .app-header {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+    background: var(--card); border-bottom: 1px solid var(--border);
+    padding: calc(var(--safe-top) + 12px) 20px 12px;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .app-logo { font-family: 'Playfair Display', serif; font-size: 1.3rem; font-weight: 700; color: var(--ink); letter-spacing: -0.02em; }
+  .app-logo span { color: var(--accent); }
+  .lang-toggle { display: flex; gap: 2px; background: var(--bg2); border-radius: 20px; padding: 3px; }
+  .lang-btn { padding: 4px 10px; border-radius: 16px; border: none; background: transparent; cursor: pointer; font-family: 'DM Sans', sans-serif; font-size: 0.78rem; font-weight: 600; color: var(--ink3); transition: all 0.2s; }
+  .lang-btn.active { background: var(--accent); color: #fff; }
+
+  .main {
+    padding-top: calc(var(--safe-top) + 68px);
+    padding-bottom: calc(var(--safe-bottom) + 80px);
+    height: 100vh;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* ── SEARCH ── */
+  .search-bar { padding: 14px 16px 10px; position: relative; }
+  .search-input { width: 100%; padding: 12px 16px 12px 42px; border: 1.5px solid var(--border); border-radius: 50px; background: var(--card); font-family: 'DM Sans', sans-serif; font-size: 0.9rem; color: var(--ink); outline: none; transition: border-color 0.2s; }
+  .search-input:focus { border-color: var(--accent); }
+  .search-icon { position: absolute; left: 30px; top: 50%; transform: translateY(-50%); font-size: 1rem; color: var(--ink3); pointer-events: none; }
+
+  /* ── FILTERS ── */
+  .filter-row { display: flex; gap: 8px; padding: 0 16px 12px; overflow-x: auto; scrollbar-width: none; }
+  .filter-row::-webkit-scrollbar { display: none; }
+  .filter-chip { flex-shrink: 0; padding: 6px 14px; border-radius: 20px; border: 1.5px solid var(--border); background: var(--card); font-size: 0.8rem; font-weight: 500; color: var(--ink2); cursor: pointer; transition: all 0.2s; white-space: nowrap; }
+  .filter-chip.active { background: var(--accent); border-color: var(--accent); color: #fff; }
+
+  .section-title { font-family: 'Playfair Display', serif; font-size: 1rem; font-weight: 600; color: var(--ink2); padding: 4px 16px 8px; letter-spacing: 0.01em; }
+
+  /* ── CARDS ── */
+  .restaurant-list { padding: 0 16px; display: flex; flex-direction: column; gap: 12px; }
+  .resto-card { background: var(--card); border-radius: var(--radius); border: 1px solid var(--border); box-shadow: 0 2px 8px var(--shadow); overflow: hidden; cursor: pointer; transition: transform 0.15s, box-shadow 0.15s; }
+  .resto-card:active { transform: scale(0.98); box-shadow: 0 1px 4px var(--shadow); }
+  .card-header { display: flex; align-items: flex-start; gap: 12px; padding: 14px 14px 10px; }
+  .card-emoji { width: 48px; height: 48px; border-radius: 12px; background: var(--bg2); display: flex; align-items: center; justify-content: center; font-size: 1.5rem; flex-shrink: 0; }
+  .card-meta { flex: 1; min-width: 0; }
+  .card-name { font-family: 'Playfair Display', serif; font-size: 1.05rem; font-weight: 600; color: var(--ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .card-type { font-size: 0.8rem; color: var(--ink3); margin-top: 2px; }
+  .card-badges { display: flex; gap: 6px; margin-top: 6px; flex-wrap: wrap; }
+  .badge { padding: 3px 8px; border-radius: 8px; font-size: 0.72rem; font-weight: 600; }
+  .badge-price { background: #f0f7f0; color: var(--green); }
+  .badge-menu { background: #fff3ed; color: var(--accent); }
+  .card-days { display: flex; gap: 4px; padding: 0 14px 12px; }
+  .day-dot { width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.65rem; font-weight: 700; }
+  .day-dot.open { background: var(--accent); color: #fff; }
+  .day-dot.closed { background: var(--bg2); color: var(--ink3); }
+
+  /* ── EMPTY ── */
+  .empty-state { text-align: center; padding: 60px 30px; display: flex; flex-direction: column; align-items: center; gap: 12px; }
+  .empty-icon { font-size: 3.5rem; }
+  .empty-title { font-family: 'Playfair Display', serif; font-size: 1.2rem; color: var(--ink2); }
+  .empty-sub { font-size: 0.88rem; color: var(--ink3); line-height: 1.5; }
+
+  /* ── BOTTOM NAV ── */
+  .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; z-index: 100; background: var(--card); border-top: 1px solid var(--border); padding: 10px 20px calc(var(--safe-bottom) + 10px); display: flex; justify-content: space-around; align-items: center; }
+  .nav-btn { display: flex; flex-direction: column; align-items: center; gap: 3px; border: none; background: transparent; cursor: pointer; color: var(--ink3); transition: color 0.2s; padding: 4px 16px; border-radius: var(--radius-sm); }
+  .nav-btn.active { color: var(--accent); }
+  .nav-btn svg { width: 22px; height: 22px; }
+  .nav-label { font-size: 0.68rem; font-weight: 600; }
+  .nav-add-btn { width: 52px; height: 52px; border-radius: 50%; background: var(--accent); color: #fff; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 16px rgba(200,93,58,0.4); font-size: 1.6rem; transition: transform 0.15s; margin-top: -20px; }
+  .nav-add-btn:active { transform: scale(0.94); }
+
+  /* ── OVERLAY ── */
+  .modal-overlay { position: fixed; inset: 0; z-index: 200; background: rgba(0,0,0,0); transition: background 0.3s; pointer-events: none; }
+  .modal-overlay.open { background: rgba(30,23,18,0.5); pointer-events: all; }
+
+  /* ── DRAWER ── */
+  .drawer { position: fixed; bottom: 0; left: 0; right: 0; z-index: 201; background: var(--card); border-radius: 24px 24px 0 0; box-shadow: 0 -8px 32px var(--shadow2); transform: translateY(100%); transition: transform 0.35s cubic-bezier(0.32,0.72,0,1); max-height: 92vh; display: flex; flex-direction: column;
+    /* Empêche le drawer de se redimensionner avec le clavier iOS */
+    will-change: transform;
+    -webkit-transform: translateY(100%);
+  }
+  .drawer.open { transform: translateY(0); }
+  .drawer-handle { width: 36px; height: 4px; border-radius: 2px; background: var(--border); margin: 12px auto 0; }
+  .drawer-header { display: flex; align-items: center; justify-content: space-between; padding: 16px 20px 12px; border-bottom: 1px solid var(--border); }
+  .drawer-title { font-family: 'Playfair Display', serif; font-size: 1.2rem; font-weight: 700; }
+  .btn-close { width: 32px; height: 32px; border-radius: 50%; background: var(--bg2); border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 1rem; color: var(--ink2); }
+  .drawer-body { overflow-y: auto; padding: 16px 20px; flex: 1; padding-bottom: calc(var(--safe-bottom) + 100px); }
+  .drawer-body::-webkit-scrollbar { width: 3px; }
+  .drawer-body::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+  /* ── FORM ── */
+  .form-section { margin-bottom: 20px; }
+  .form-section-title { font-size: 0.72rem; font-weight: 700; color: var(--ink3); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 10px; }
+  .form-group { margin-bottom: 12px; }
+  .form-label { display: block; font-size: 0.82rem; font-weight: 500; color: var(--ink2); margin-bottom: 5px; }
+  .form-input, .form-select, .form-textarea { width: 100%; padding: 11px 14px; border: 1.5px solid var(--border); border-radius: var(--radius-sm); background: var(--bg); font-family: 'DM Sans', sans-serif; font-size: 0.9rem; color: var(--ink); outline: none; transition: border-color 0.2s; }
+  .form-input:focus, .form-select:focus, .form-textarea:focus { border-color: var(--accent); background: var(--card); }
+  .form-textarea { resize: vertical; min-height: 80px; }
+  .form-row { display: flex; gap: 10px; }
+  .form-row .form-group { flex: 1; }
+
+  .price-selector { display: flex; gap: 6px; }
+  .price-btn { flex: 1; padding: 10px; border-radius: var(--radius-sm); border: 1.5px solid var(--border); background: var(--bg); font-size: 0.9rem; cursor: pointer; transition: all 0.2s; text-align: center; font-weight: 600; color: var(--ink3); }
+  .price-btn.active { background: var(--gold2); border-color: var(--gold); color: var(--ink); }
+
+  .day-selector { display: flex; gap: 6px; }
+  .day-toggle { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px; cursor: pointer; }
+  .day-toggle input { display: none; }
+  .day-toggle-dot { width: 36px; height: 36px; border-radius: 50%; background: var(--bg2); border: 2px solid var(--border); display: flex; align-items: center; justify-content: center; font-size: 0.65rem; font-weight: 700; color: var(--ink3); transition: all 0.2s; text-transform: uppercase; }
+  .day-toggle input:checked ~ .day-toggle-dot { background: var(--accent); border-color: var(--accent); color: #fff; }
+  .day-label-text { font-size: 0.6rem; color: var(--ink3); }
+
+  .dish-list { display: flex; flex-direction: column; gap: 6px; margin-bottom: 8px; }
+  .dish-item { display: flex; align-items: center; gap: 8px; background: var(--bg); border-radius: var(--radius-sm); padding: 8px 12px; border: 1px solid var(--border); }
+  .dish-name { flex: 1; font-size: 0.88rem; color: var(--ink); }
+  .dish-remove { width: 24px; height: 24px; border-radius: 50%; background: #fee; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 0.85rem; color: var(--red); }
+  .add-dish-row { display: flex; gap: 8px; }
+  .add-dish-row .form-input { flex: 1; }
+  .btn-add-dish { padding: 11px 14px; border-radius: var(--radius-sm); background: var(--accent); color: #fff; border: none; cursor: pointer; font-size: 0.88rem; font-weight: 600; white-space: nowrap; }
+
+  /* ── CAMERA ZONE ── */
+  .camera-zone { border: 2px dashed var(--border); border-radius: var(--radius); padding: 20px; text-align: center; cursor: pointer; background: var(--bg); transition: border-color 0.2s; position: relative; overflow: hidden; }
+  .camera-zone:active { border-color: var(--accent); background: var(--bg2); }
+  .camera-zone img { max-width: 100%; max-height: 160px; border-radius: var(--radius-sm); object-fit: contain; display: block; margin: 0 auto; }
+  .camera-placeholder { color: var(--ink3); }
+  .camera-icon { font-size: 2rem; display: block; margin-bottom: 6px; }
+  .camera-text { font-size: 0.85rem; }
+  .camera-actions { display: flex; gap: 8px; margin-top: 10px; }
+  .cam-btn { flex: 1; padding: 10px; border-radius: var(--radius-sm); border: 1.5px solid var(--border); background: var(--card); font-size: 0.82rem; font-weight: 600; cursor: pointer; color: var(--ink2); }
+  .cam-btn.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+  #cardInputFallback { display: none; }
+
+  /* ── LOCATION ── */
+  .location-row { display: flex; gap: 8px; align-items: flex-end; }
+  .location-row .form-group { flex: 1; }
+  .btn-locate { padding: 11px 16px; border-radius: var(--radius-sm); background: var(--green); color: #fff; border: none; cursor: pointer; font-size: 1rem; font-weight: 600; white-space: nowrap; }
+
+  .btn-submit { width: 100%; padding: 16px; border-radius: var(--radius); background: var(--accent); color: #fff; border: none; font-family: 'DM Sans', sans-serif; font-size: 1rem; font-weight: 700; cursor: pointer; margin-top: 4px; transition: opacity 0.2s; }
+  .btn-submit:active { opacity: 0.85; }
+  .btn-delete { width: 100%; padding: 13px; border-radius: var(--radius); background: transparent; color: var(--red); border: 1.5px solid #fcc; font-family: 'DM Sans', sans-serif; font-size: 0.9rem; font-weight: 600; cursor: pointer; margin-top: 8px; }
+
+  /* ── DETAIL ── */
+  .detail-section { margin-bottom: 20px; }
+  .detail-section-title { font-size: 0.72rem; font-weight: 700; color: var(--ink3); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 10px; }
+  .detail-name { font-family: 'Playfair Display', serif; font-size: 1.6rem; font-weight: 700; color: var(--ink); line-height: 1.2; margin-bottom: 6px; }
+  .detail-type { font-size: 0.9rem; color: var(--ink2); margin-bottom: 12px; }
+  .detail-chips { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; }
+  .detail-chip { padding: 6px 12px; border-radius: 20px; border: 1.5px solid var(--border); font-size: 0.82rem; font-weight: 500; color: var(--ink2); text-decoration: none; display: inline-block; }
+  .days-grid { display: flex; gap: 6px; }
+  .day-info { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px; }
+  .day-info .dot { width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.65rem; font-weight: 700; text-transform: uppercase; }
+  .day-info .dot.open { background: var(--accent); color: #fff; }
+  .day-info .dot.closed { background: var(--bg2); color: var(--ink3); }
+  .day-info .day-label { font-size: 0.6rem; color: var(--ink3); }
+  .dish-tag { display: inline-flex; align-items: center; gap: 6px; background: var(--bg2); border-radius: 20px; padding: 6px 12px; font-size: 0.85rem; color: var(--ink2); margin: 0 4px 6px 0; }
+  .map-btns { display: flex; gap: 8px; }
+  .map-btn { flex: 1; padding: 13px; border-radius: var(--radius-sm); border: 1.5px solid var(--border); background: var(--card); font-size: 0.85rem; font-weight: 600; cursor: pointer; text-align: center; text-decoration: none; color: var(--ink); display: flex; align-items: center; justify-content: center; gap: 6px; transition: all 0.2s; }
+  .card-preview { border-radius: var(--radius-sm); overflow: hidden; border: 1px solid var(--border); }
+  .card-preview img { width: 100%; object-fit: contain; display: block; }
+  .notes-box { background: var(--bg); border-radius: var(--radius-sm); padding: 12px 14px; font-size: 0.88rem; color: var(--ink2); line-height: 1.5; border: 1px solid var(--border); }
+  .edit-btn { width: 100%; padding: 14px; border-radius: var(--radius); background: var(--ink); color: #fff; border: none; font-family: 'DM Sans', sans-serif; font-size: 0.95rem; font-weight: 700; cursor: pointer; }
+
+  /* ── STARS ── */
+  .star-row { display: flex; gap: 4px; }
+  .star { font-size: 1.3rem; cursor: pointer; transition: transform 0.1s; filter: grayscale(1); opacity: 0.4; }
+  .star.on { filter: none; opacity: 1; }
+  .star:active { transform: scale(1.3); }
+
+  /* ── TOAST ── */
+  .toast { position: fixed; bottom: 90px; left: 50%; transform: translateX(-50%) translateY(20px); background: var(--ink); color: #fff; padding: 10px 20px; border-radius: 50px; font-size: 0.85rem; font-weight: 500; z-index: 300; opacity: 0; transition: all 0.3s; pointer-events: none; white-space: nowrap; }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+  /* ── LOADER ── */
+  .spinner { display: inline-block; width: 18px; height: 18px; border: 2px solid rgba(255,255,255,0.4); border-top-color: #fff; border-radius: 50%; animation: spin 0.6s linear infinite; vertical-align: middle; margin-right: 6px; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .fade-in { animation: fadeIn 0.3s ease; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+  /* ── SETTINGS ── */
+  .settings-section { margin-bottom: 24px; }
+  .settings-section-title { font-size: 0.72rem; font-weight: 700; color: var(--ink3); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 10px; padding: 0 4px; }
+  .settings-row { display: flex; align-items: center; justify-content: space-between; padding: 14px 16px; background: var(--card); border-radius: var(--radius-sm); border: 1px solid var(--border); margin-bottom: 8px; cursor: pointer; transition: background 0.15s; }
+  .settings-row:active { background: var(--bg2); }
+  .settings-row-left { display: flex; align-items: center; gap: 12px; }
+  .settings-row-icon { width: 36px; height: 36px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 1.1rem; flex-shrink: 0; }
+  .settings-row-icon.green { background: #e8f5ee; }
+  .settings-row-icon.blue  { background: #e8f0ff; }
+  .settings-row-icon.orange{ background: #fff3ed; }
+  .settings-row-icon.red   { background: #fee; }
+  .settings-row-text { display: flex; flex-direction: column; }
+  .settings-row-label { font-size: 0.9rem; font-weight: 600; color: var(--ink); }
+  .settings-row-sub   { font-size: 0.76rem; color: var(--ink3); margin-top: 1px; }
+  .settings-row-arrow { color: var(--ink3); font-size: 0.8rem; }
+  .settings-row.danger .settings-row-label { color: var(--red); }
+  .settings-row.danger .settings-row-icon { background: #fee; }
+
+  /* À propos */
+  .about-logo { text-align: center; padding: 24px 0 16px; }
+  .about-logo-text { font-family: 'Playfair Display', serif; font-size: 2rem; font-weight: 700; color: var(--ink); }
+  .about-logo-text span { color: var(--accent); }
+  .about-version { font-size: 0.8rem; color: var(--ink3); margin-top: 4px; }
+  .about-desc { font-size: 0.88rem; color: var(--ink2); line-height: 1.6; text-align: center; padding: 0 8px 20px; }
+  .about-divider { height: 1px; background: var(--border); margin: 8px 0 20px; }
+  .about-credit { text-align: center; font-size: 0.8rem; color: var(--ink3); padding-bottom: 8px; }
+
+  /* Import confirm zone */
+  .import-zone { border: 2px dashed var(--border); border-radius: var(--radius); padding: 24px; text-align: center; cursor: pointer; background: var(--bg); transition: border-color 0.2s; margin-bottom: 12px; }
+  .import-zone:active { border-color: var(--accent); }
+  .import-zone-icon { font-size: 2rem; display: block; margin-bottom: 8px; }
+  .import-zone-text { font-size: 0.85rem; color: var(--ink3); }
+
+  /* Badge compteur */
+  .stat-badge { background: var(--accent); color: #fff; border-radius: 20px; padding: 2px 8px; font-size: 0.72rem; font-weight: 700; }
+
+  /* Btn settings dans header */
+  .btn-settings { width: 34px; height: 34px; border-radius: 50%; background: var(--bg2); border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 1.1rem; }
+
+</style>
+</head>
+<body>
+
+<header class="app-header">
+  <div class="app-logo">Mes<span>Restos</span></div>
+  <div style="display:flex;align-items:center;gap:10px">
+    <div class="lang-toggle">
+      <button class="lang-btn active" onclick="setLang('fr')">FR</button>
+      <button class="lang-btn" onclick="setLang('en')">EN</button>
+    </div>
+    <button class="btn-settings" onclick="openSettings()" title="Paramètres">⚙️</button>
+  </div>
+</header>
+
+<main class="main">
+  <div class="search-bar">
+    <span class="search-icon">🔍</span>
+    <input type="text" class="search-input" id="searchInput" placeholder="Rechercher…" oninput="renderList()">
+  </div>
+  <div class="filter-row" id="filterRow"></div>
+  <p class="section-title" id="sectionTitle"></p>
+  <div class="restaurant-list" id="restaurantList"></div>
+</main>
+
+<nav class="bottom-nav">
+  <button class="nav-btn active" id="navList" onclick="switchTab('list')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/>
+      <rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/>
+    </svg>
+    <span class="nav-label" data-i18n="list">Liste</span>
+  </button>
+  <button class="nav-add-btn" onclick="openForm()">+</button>
+  <button class="nav-btn" id="navMap" onclick="switchTab('map')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/>
+      <circle cx="12" cy="9" r="2.5"/>
+    </svg>
+    <span class="nav-label" data-i18n="map">Carte</span>
+  </button>
+</nav>
+
+<div class="modal-overlay" id="overlay" onclick="closeAll()"></div>
+<div class="drawer" id="formDrawer">
+  <div class="drawer-handle"></div>
+  <div class="drawer-header">
+    <span class="drawer-title" id="formTitle"></span>
+    <button class="btn-close" onclick="closeAll()">✕</button>
+  </div>
+  <div class="drawer-body" id="formBody"></div>
+</div>
+<div class="drawer" id="detailDrawer">
+  <div class="drawer-handle"></div>
+  <div class="drawer-header">
+    <span class="drawer-title" data-i18n="detail">Détails</span>
+    <button class="btn-close" onclick="closeDetail()">✕</button>
+  </div>
+  <div class="drawer-body" id="detailBody"></div>
+</div>
+
+<div class="toast" id="toast"></div>
+<!-- Fallback file input (browser) -->
+<input type="file" id="cardInputFallback" accept="image/*" capture="environment" onchange="handleCardFallback(event)">
+<!-- Import JSON -->
+<input type="file" id="importFileInput" accept="application/json,.json,.xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" onchange="handleImportFile(event)" style="display:none">
+
+<!-- SETTINGS DRAWER -->
+<div class="drawer" id="settingsDrawer">
+  <div class="drawer-handle"></div>
+  <div class="drawer-header">
+    <span class="drawer-title" id="settingsTitle">Paramètres</span>
+    <button class="btn-close" onclick="closeSettings()">✕</button>
+  </div>
+  <div class="drawer-body" id="settingsBody"></div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script>
+// ══════════════════════════════════════════════════
+//  CAPACITOR PLUGIN BRIDGE
+//  Détecte si on est sur natif ou navigateur web
+// ══════════════════════════════════════════════════
+const isNative = () => window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform();
+
+function getPlugin(name) {
+  if (isNative() && window.Capacitor?.Plugins?.[name]) {
+    return window.Capacitor.Plugins[name];
+  }
+  return null;
+}
+
+// ── GEOLOCATION ──
+async function getCurrentPosition() {
+  const Geo = getPlugin('Geolocation');
+  if (!Geo) {
+    return new Promise((resolve, reject) => {
+      navigator.geolocation.getCurrentPosition(
+        p => resolve({ coords: p.coords }),
+        reject,
+        { enableHighAccuracy: true }
+      );
+    });
+  }
+  return await Geo.getCurrentPosition({ enableHighAccuracy: true });
+}
+
+// ── PREFERENCES (localStorage fallback) ──
+async function prefSet(key, value) {
+  const Pref = getPlugin('Preferences');
+  if (!Pref) { localStorage.setItem(key, value); return; }
+  await Pref.set({ key, value });
+}
+async function prefGet(key) {
+  const Pref = getPlugin('Preferences');
+  if (!Pref) { return { value: localStorage.getItem(key) }; }
+  return await Pref.get({ key });
+}
+
+// ── HAPTICS ──
+function hapticLight() {
+  const Hap = getPlugin('Haptics');
+  if (Hap) Hap.impact({ style: 'LIGHT' }).catch(()=>{});
+}
+
+// ══════════════════════════════════════════════════
+//  OUVRIR DANS MAP
+// ══════════════════════════════════════════════════
+function openInMaps(app, r) {
+  hapticLight();
+  const lat = r.lat, lng = r.lng, name = encodeURIComponent(r.name);
+  const addr = encodeURIComponent(r.address || r.name);
+  let url;
+  if (app === 'google') {
+    url = (lat && lng)
+      ? `https://www.google.com/maps?q=${lat},${lng}`
+      : `https://www.google.com/maps/search/${addr}`;
+  } else {
+    url = (lat && lng)
+      ? `maps://maps.apple.com/?ll=${lat},${lng}&q=${name}`
+      : `maps://maps.apple.com/?q=${addr}`;
+  }
+  window.open(url, '_blank');
+}
+
+// ══════════════════════════════════════════════════
+//  I18N
+// ══════════════════════════════════════════════════
+const i18n = {
+  fr: {
+    list:'Liste', map:'Carte', detail:'Détails',
+    searchPlaceholder:'Rechercher un restaurant…',
+    sectionTitle:'Mes restaurants favoris',
+    noResults:'Aucun restaurant trouvé', noResultsSub:'Essayez un autre filtre ou ajoutez-en un !',
+    emptyTitle:'Aucun restaurant enregistré', emptySub:'Appuyez sur + pour ajouter votre premier restaurant favori.',
+    newResto:'Nouveau restaurant', editResto:'Modifier le restaurant',
+    sectionInfo:'INFORMATIONS', sectionMenu:'MENU PAR JOUR', sectionDishes:'PLATS PRÉFÉRÉS',
+    sectionLocation:'LOCALISATION', sectionCard:'CARTE DE VISITE', sectionNotes:'NOTES',
+    name:'Nom du restaurant', type:'Type de cuisine', price:'Tarif',
+    phone:'Téléphone', website:'Site web', email:'Email',
+    menuDays:'Jours avec menu du jour', address:'Adresse',
+    lat:'Latitude', lng:'Longitude',
+    dish:'Nom du plat…', addDish:'Ajouter',
+    scanCard:'📷 Prendre / Choisir la carte de visite',
+    takePhoto:'📷 Caméra', choosePhoto:'🖼 Bibliothèque',
+    notes:'Notes, ambiance, avis personnel…',
+    save:'Enregistrer', delete:'Supprimer ce restaurant',
+    confirmDelete:'Supprimer ce restaurant ?', saved:'✓ Enregistré', deleted:'✓ Supprimé',
+    edit:'✏️ Modifier', openGoogle:'🗺 Google Maps', openApple:'🍎 Apple Plans',
+    rating:'Ma note', filterAll:'Tous',
+    days:['Lun','Mar','Mer','Jeu','Ven','Sam','Dim'],
+    daysLong:['Lundi','Mardi','Mercredi','Jeudi','Vendredi','Samedi','Dimanche'],
+    types:['Française','Italienne','Japonaise','Américaine','Indienne','Thaï','Mexicaine','Méditerranéenne','Asiatique','Fast Food','Brasserie','Gastronomique','Autre'],
+    hasmenu:'Menu', price1:'€', price2:'€€', price3:'€€€', price4:'€€€€',
+    locating:'Localisation…', locError:'Impossible d\'obtenir la position',
+    // Paramètres
+    settings:'Paramètres', settingsData:'DONNÉES', settingsApp:'APPLICATION',
+    exportData:'Exporter en Excel', exportSub:'Fichier .xlsx dans MesRestos',
+    importData:'Importer des données', importSub:'Restaurer depuis .xlsx ou .json',
+    resetData:'Réinitialiser', resetSub:'Supprimer tous les restaurants',
+    confirmReset:'Supprimer TOUS les restaurants ? Cette action est irréversible.',
+    confirmImport:'Remplacer toutes les données par ce fichier ?',
+    exportOk:'✓ Fichier exporté dans MesRestos', importOk:'✓ Données importées',
+    resetOk:'✓ Données réinitialisées', exportError:'Erreur lors de l\'export',
+    importError:'Fichier invalide',
+    aboutTitle:'À propos', aboutVersion:'Version 1.0.0',
+    aboutDesc:'Application de gestion de vos restaurants favoris. Enregistrez, organisez et retrouvez facilement vos adresses préférées.',
+    aboutCredit:'Fait avec ❤️ par Michel Garlandat',
+    nRestaurants: n => `${n} restaurant${n>1?'s':''}`,
+  },
+  en: {
+    list:'List', map:'Map', detail:'Details',
+    searchPlaceholder:'Search a restaurant…',
+    sectionTitle:'My favorite restaurants',
+    noResults:'No restaurant found', noResultsSub:'Try another filter or add one!',
+    emptyTitle:'No restaurant saved', emptySub:'Press + to add your first favorite restaurant.',
+    newResto:'New restaurant', editResto:'Edit restaurant',
+    sectionInfo:'INFORMATION', sectionMenu:'MENU BY DAY', sectionDishes:'FAVORITE DISHES',
+    sectionLocation:'LOCATION', sectionCard:'BUSINESS CARD', sectionNotes:'NOTES',
+    name:'Restaurant name', type:'Cuisine type', price:'Price range',
+    phone:'Phone', website:'Website', email:'Email',
+    menuDays:'Days with set menu', address:'Address',
+    lat:'Latitude', lng:'Longitude',
+    dish:'Dish name…', addDish:'Add',
+    scanCard:'📷 Take / Choose business card',
+    takePhoto:'📷 Camera', choosePhoto:'🖼 Library',
+    notes:'Notes, ambiance, personal review…',
+    save:'Save', delete:'Delete this restaurant',
+    confirmDelete:'Delete this restaurant?', saved:'✓ Saved', deleted:'✓ Deleted',
+    edit:'✏️ Edit', openGoogle:'🗺 Google Maps', openApple:'🍎 Apple Maps',
+    rating:'My rating', filterAll:'All',
+    days:['Mon','Tue','Wed','Thu','Fri','Sat','Sun'],
+    daysLong:['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'],
+    types:['French','Italian','Japanese','American','Indian','Thai','Mexican','Mediterranean','Asian','Fast Food','Brasserie','Gastronomic','Other'],
+    hasmenu:'Menu', price1:'$', price2:'$$', price3:'$$$', price4:'$$$$',
+    locating:'Locating…', locError:'Could not get location',
+    // Settings
+    settings:'Settings', settingsData:'DATA', settingsApp:'APPLICATION',
+    exportData:'Export to Excel', exportSub:'.xlsx file in MesRestos folder',
+    importData:'Import data', importSub:'Restore from .xlsx or .json',
+    resetData:'Reset', resetSub:'Delete all restaurants',
+    confirmReset:'Delete ALL restaurants? This action cannot be undone.',
+    confirmImport:'Replace all data with this file?',
+    exportOk:'✓ File exported to MesRestos', importOk:'✓ Data imported',
+    resetOk:'✓ Data reset', exportError:'Export error',
+    importError:'Invalid file',
+    aboutTitle:'About', aboutVersion:'Version 1.0.0',
+    aboutDesc:'Manage your favorite restaurants. Save, organize and easily find your favorite addresses.',
+    aboutCredit:'Made with ❤️ by Michel Garlandat',
+    nRestaurants: n => `${n} restaurant${n>1?'s':''}`,
+  }
+};
+let lang = 'fr';
+const t = k => i18n[lang][k] || k;
+function setLang(l) {
+  lang = l;
+  document.querySelectorAll('.lang-btn').forEach(b => b.classList.toggle('active', b.textContent === l.toUpperCase()));
+  document.getElementById('searchInput').placeholder = t('searchPlaceholder');
+  document.querySelectorAll('[data-i18n]').forEach(el => { const k = el.dataset.i18n; if(t(k)) el.textContent = t(k); });
+  renderList(); renderFilters();
+}
+
+// ══════════════════════════════════════════════════
+//  TYPES EMOJI
+// ══════════════════════════════════════════════════
+const TYPES_EMOJI = {
+  'Française':'🥐','Italienne':'🍕','Japonaise':'🍣','Américaine':'🍔','Indienne':'🍛','Thaï':'🍜',
+  'Mexicaine':'🌮','Méditerranéenne':'🫒','Asiatique':'🥢','Fast Food':'🍟','Brasserie':'🍺',
+  'Gastronomique':'⭐','Autre':'🍽',
+  'French':'🥐','Italian':'🍕','Japanese':'🍣','American':'🍔','Indian':'🍛','Thai':'🍜',
+  'Mexican':'🌮','Mediterranean':'🫒','Asian':'🥢','Gastronomic':'⭐','Other':'🍽'
+};
+const getEmoji = type => TYPES_EMOJI[type] || '🍽';
+
+// ══════════════════════════════════════════════════
+//  DATA
+// ══════════════════════════════════════════════════
+const SAMPLE = [
+  { id:'s1', name:'Le Petit Bistrot', type:'Française', price:'2', phone:'01 42 33 44 55', website:'', email:'',
+    address:'14 rue de la Paix, 75001 Paris', lat:'48.8698', lng:'2.3308',
+    menuDays:{mon:true,tue:true,wed:true,thu:true,fri:true,sat:false,sun:false},
+    dishes:['Bœuf bourguignon','Tarte Tatin','Foie gras maison'],
+    businessCard:null, notes:'Ambiance chaleureuse, terrasse agréable en été.', rating:4 },
+  { id:'s2', name:'Sakura Tokyo', type:'Japonaise', price:'3', phone:'01 55 22 11 00', website:'https://sakura.fr', email:'',
+    address:'8 rue Saint-Anne, 75001 Paris', lat:'48.8654', lng:'2.3365',
+    menuDays:{mon:false,tue:true,wed:true,thu:true,fri:true,sat:true,sun:false},
+    dishes:['Sashimi saumon','Ramen miso','Mochi glace'],
+    businessCard:null, notes:'Meilleurs sushis du quartier. Réservation conseillée le week-end.', rating:5 },
+  { id:'s3', name:'La Trattoria', type:'Italienne', price:'2', phone:'01 48 77 65 43', website:'', email:'contact@trattoria.fr',
+    address:'22 boulevard Montparnasse, 75014 Paris', lat:'48.8422', lng:'2.3246',
+    menuDays:{mon:false,tue:false,wed:true,thu:true,fri:true,sat:false,sun:false},
+    dishes:['Carbonara maison','Pizza Napolitaine','Tiramisu'],
+    businessCard:null, notes:'Patron très sympa, portions généreuses.', rating:4 },
+];
+
+let restaurants = [];
+let editingId = null;
+let currentDishes = [];
+let currentCard = null;
+let activeFilter = 'all';
+let selectedPrice = null;
+let selectedRating = 0;
+
+async function loadData() {
+  const res = await prefGet('mesrestos');
+  if (res?.value) {
+    restaurants = JSON.parse(res.value);
+  } else {
+    restaurants = SAMPLE;
+    await saveData();
+  }
+  renderFilters();
+  renderList();
+}
+
+async function saveData() {
+  await prefSet('mesrestos', JSON.stringify(restaurants));
+}
+
+// ══════════════════════════════════════════════════
+//  RENDER LIST
+// ══════════════════════════════════════════════════
+function renderFilters() {
+  const types = ['all', ...new Set(restaurants.map(r => r.type).filter(Boolean))];
+  document.getElementById('filterRow').innerHTML = types.map(tp => {
+    const label = tp === 'all' ? t('filterAll') : tp;
+    return `<div class="filter-chip ${activeFilter===tp?'active':''}" onclick="setFilter('${tp}')">${label}</div>`;
+  }).join('');
+}
+
+function setFilter(f) { activeFilter = f; hapticLight(); renderFilters(); renderList(); }
+
+function renderList() {
+  const q = document.getElementById('searchInput').value.toLowerCase();
+  document.getElementById('sectionTitle').textContent = t('sectionTitle');
+  let list = restaurants.filter(r => {
+    const matchQ = !q || r.name?.toLowerCase().includes(q) || r.type?.toLowerCase().includes(q) || r.address?.toLowerCase().includes(q);
+    const matchF = activeFilter === 'all' || r.type === activeFilter;
+    return matchQ && matchF;
+  });
+
+  const el = document.getElementById('restaurantList');
+  if (restaurants.length === 0) {
+    el.innerHTML = `<div class="empty-state fade-in"><div class="empty-icon">🍽️</div><div class="empty-title">${t('emptyTitle')}</div><div class="empty-sub">${t('emptySub')}</div></div>`;
+    return;
+  }
+  if (list.length === 0) {
+    el.innerHTML = `<div class="empty-state fade-in"><div class="empty-icon">🔍</div><div class="empty-title">${t('noResults')}</div><div class="empty-sub">${t('noResultsSub')}</div></div>`;
+    return;
+  }
+
+  const days = t('days');
+  const dayKeys = ['mon','tue','wed','thu','fri','sat','sun'];
+  el.innerHTML = list.map(r => {
+    const hasMenu = dayKeys.some(d => r.menuDays?.[d]);
+    const priceMap = {'1':t('price1'),'2':t('price2'),'3':t('price3'),'4':t('price4')};
+    const stars = r.rating ? '⭐'.repeat(r.rating) : '';
+    return `<div class="resto-card fade-in" onclick="openDetail('${r.id}')">
+      <div class="card-header">
+        <div class="card-emoji">${getEmoji(r.type)}</div>
+        <div class="card-meta">
+          <div class="card-name">${r.name}</div>
+          <div class="card-type">${r.type||''}${stars?' · '+stars:''}</div>
+          <div class="card-badges">
+            ${r.price?`<span class="badge badge-price">${priceMap[r.price]||r.price}</span>`:''}
+            ${hasMenu?`<span class="badge badge-menu">🗒 ${t('hasmenu')}</span>`:''}
+          </div>
+        </div>
+      </div>
+      <div class="card-days">
+        ${days.map((d,i)=>`<div class="day-dot ${r.menuDays?.[dayKeys[i]]?'open':'closed'}">${d[0]}</div>`).join('')}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ══════════════════════════════════════════════════
+//  DETAIL
+// ══════════════════════════════════════════════════
+function openDetail(id) {
+  hapticLight();
+  const r = restaurants.find(x => x.id === id);
+  if (!r) return;
+  const days = t('days');
+  const dayKeys = ['mon','tue','wed','thu','fri','sat','sun'];
+  const priceMap = {'1':t('price1'),'2':t('price2'),'3':t('price3'),'4':t('price4')};
+
+  document.getElementById('detailBody').innerHTML = `
+    <div class="detail-section">
+      <div class="detail-name">${r.name}</div>
+      <div class="detail-type">${r.type||''}</div>
+      <div class="detail-chips">
+        ${r.price?`<div class="detail-chip">${priceMap[r.price]||r.price}</div>`:''}
+        ${r.phone?`<a href="tel:${r.phone}" class="detail-chip">📞 ${r.phone}</a>`:''}
+        ${r.website?`<a href="${r.website}" target="_blank" class="detail-chip">🌐 Site</a>`:''}
+        ${r.email?`<a href="mailto:${r.email}" class="detail-chip">✉️ Email</a>`:''}
+      </div>
+      ${r.rating?`<div style="margin-bottom:8px">${'⭐'.repeat(r.rating)}</div>`:''}
+    </div>
+
+    ${dayKeys.some(d=>r.menuDays?.[d])?`
+    <div class="detail-section">
+      <div class="detail-section-title">${t('sectionMenu')}</div>
+      <div class="days-grid">
+        ${days.map((d,i)=>`<div class="day-info"><div class="dot ${r.menuDays[dayKeys[i]]?'open':'closed'}">${d[0]}</div><div class="day-label">${d}</div></div>`).join('')}
+      </div>
+    </div>`:''}
+
+    ${r.dishes?.length?`
+    <div class="detail-section">
+      <div class="detail-section-title">${t('sectionDishes')}</div>
+      <div>${r.dishes.map(d=>`<span class="dish-tag">🍽 ${d}</span>`).join('')}</div>
+    </div>`:''}
+
+    ${r.address||r.lat?`
+    <div class="detail-section">
+      <div class="detail-section-title">${t('sectionLocation')}</div>
+      ${r.address?`<div style="font-size:.88rem;color:var(--ink2);margin-bottom:10px">📍 ${r.address}</div>`:''}
+      <div class="map-btns">
+        <button class="map-btn" onclick="openInMaps('google', ${JSON.stringify(r).replace(/"/g,'&quot;')})">${t('openGoogle')}</button>
+        <button class="map-btn" onclick="openInMaps('apple', ${JSON.stringify(r).replace(/"/g,'&quot;')})">${t('openApple')}</button>
+      </div>
+    </div>`:''}
+
+    ${r.businessCard?`
+    <div class="detail-section">
+      <div class="detail-section-title">${t('sectionCard')}</div>
+      <div class="card-preview"><img src="${r.businessCard}" alt="carte de visite"></div>
+    </div>`:''}
+
+    ${r.notes?`
+    <div class="detail-section">
+      <div class="detail-section-title">${t('sectionNotes')}</div>
+      <div class="notes-box">${r.notes}</div>
+    </div>`:''}
+
+    <button class="edit-btn" onclick="openForm('${r.id}')">${t('edit')}</button>
+  `;
+  openOverlay();
+  document.getElementById('detailDrawer').classList.add('open');
+}
+
+function closeDetail() {
+  document.getElementById('detailDrawer').classList.remove('open');
+  closeOverlay();
+}
+
+// ══════════════════════════════════════════════════
+//  FORM
+// ══════════════════════════════════════════════════
+function openForm(id) {
+  hapticLight();
+  closeDetail();
+  editingId = id || null;
+  const r = id ? restaurants.find(x => x.id === id) : {};
+  currentDishes = [...(r.dishes||[])];
+  currentCard = r.businessCard || null;
+  selectedPrice = r.price || null;
+  selectedRating = r.rating || 0;
+
+  const days = t('days');
+  const dayKeys = ['mon','tue','wed','thu','fri','sat','sun'];
+  const types = t('types');
+
+  document.getElementById('formTitle').textContent = id ? t('editResto') : t('newResto');
+  document.getElementById('formBody').innerHTML = `
+    <div class="form-section">
+      <div class="form-section-title">${t('sectionInfo')}</div>
+      <div class="form-group">
+        <label class="form-label">${t('name')} *</label>
+        <input class="form-input" id="fName" value="${r.name||''}" placeholder="${t('name')}">
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">${t('type')}</label>
+          <select class="form-select" id="fType">
+            <option value="">—</option>
+            ${types.map(tp=>`<option value="${tp}" ${r.type===tp?'selected':''}>${tp}</option>`).join('')}
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">${t('price')}</label>
+          <div class="price-selector">
+            ${['1','2','3','4'].map(p=>`<div class="price-btn ${r.price===p?'active':''}" onclick="selectPrice('${p}',this)">${i18n[lang]['price'+p]}</div>`).join('')}
+          </div>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">${t('phone')}</label>
+          <input class="form-input" id="fPhone" type="tel" value="${r.phone||''}" placeholder="+33...">
+        </div>
+        <div class="form-group">
+          <label class="form-label">${t('email')}</label>
+          <input class="form-input" id="fEmail" type="email" value="${r.email||''}" placeholder="contact@...">
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">${t('website')}</label>
+        <input class="form-input" id="fWebsite" type="url" value="${r.website||''}" placeholder="https://...">
+      </div>
+      <div class="form-group">
+        <label class="form-label">${t('rating')}</label>
+        <div class="star-row" id="starRow">
+          ${[1,2,3,4,5].map(n=>`<span class="star ${selectedRating>=n?'on':''}" onclick="setRating(${n})">⭐</span>`).join('')}
+        </div>
+      </div>
+    </div>
+
+    <div class="form-section">
+      <div class="form-section-title">${t('sectionMenu')}</div>
+      <p style="font-size:.8rem;color:var(--ink3);margin-bottom:10px">${t('menuDays')}</p>
+      <div class="day-selector">
+        ${days.map((d,i)=>`<label class="day-toggle">
+          <input type="checkbox" id="fDay_${dayKeys[i]}" ${r.menuDays?.[dayKeys[i]]?'checked':''}>
+          <div class="day-toggle-dot">${d[0]}</div>
+          <span class="day-label-text">${d}</span>
+        </label>`).join('')}
+      </div>
+    </div>
+
+    <div class="form-section">
+      <div class="form-section-title">${t('sectionDishes')}</div>
+      <div class="dish-list" id="dishList"></div>
+      <div class="add-dish-row">
+        <input class="form-input" id="dishInput" placeholder="${t('dish')}">
+        <button class="btn-add-dish" onclick="addDish()">${t('addDish')}</button>
+      </div>
+    </div>
+
+    <div class="form-section">
+      <div class="form-section-title">${t('sectionLocation')}</div>
+      <div class="form-group">
+        <label class="form-label">${t('address')}</label>
+        <input class="form-input" id="fAddress" value="${r.address||''}" placeholder="12 rue de la Paix, Paris…">
+      </div>
+      <div class="location-row">
+        <div class="form-group">
+          <label class="form-label">${t('lat')}</label>
+          <input class="form-input" id="fLat" type="number" step="any" value="${r.lat||''}">
+        </div>
+        <div class="form-group">
+          <label class="form-label">${t('lng')}</label>
+          <input class="form-input" id="fLng" type="number" step="any" value="${r.lng||''}">
+        </div>
+        <button class="btn-locate" onclick="locateMe(this)" title="Localiser">📍</button>
+      </div>
+    </div>
+
+    <div class="form-section">
+      <div class="form-section-title">${t('sectionCard')}</div>
+      <div class="camera-zone" id="cameraZone">
+        <div id="cardPreview">
+          ${currentCard
+            ? `<img src="${currentCard}" alt="carte">`
+            : `<div class="camera-placeholder"><span class="camera-icon">📷</span><span class="camera-text">${t('scanCard')}</span></div>`}
+        </div>
+      </div>
+      <div class="camera-actions" style="margin-top:8px">
+        <button class="cam-btn primary" id="btnCamera" type="button">${t('takePhoto')}</button>
+        <button class="cam-btn" id="btnLibrary" type="button">${t('choosePhoto')}</button>
+        ${currentCard ? `<button class="cam-btn" id="btnRemoveCard" type="button">🗑</button>` : ''}
+      </div>
+    </div>
+
+    <div class="form-section">
+      <div class="form-section-title">${t('sectionNotes')}</div>
+      <textarea class="form-textarea" id="fNotes" placeholder="${t('notes')}">${r.notes||''}</textarea>
+    </div>
+
+    <button class="btn-submit" onclick="submitForm()">${t('save')}</button>
+    ${id?`<button class="btn-delete" onclick="deleteResto('${id}')">${t('delete')}</button>`:''}
+  `;
+
+  renderDishes();
+  openOverlay();
+  document.getElementById('formDrawer').classList.add('open');
+
+  // ── Attacher les listeners caméra APRÈS le rendu du DOM ──
+  setTimeout(() => {
+    const btnCam = document.getElementById('btnCamera');
+    const btnLib = document.getElementById('btnLibrary');
+    const btnRm  = document.getElementById('btnRemoveCard');
+    if (btnCam) btnCam.addEventListener('click', e => { e.stopPropagation(); captureCard(); });
+    if (btnLib) btnLib.addEventListener('click', e => { e.stopPropagation(); chooseFromLibrary(); });
+    if (btnRm)  btnRm.addEventListener('click',  e => { e.stopPropagation(); removeCard(); });
+  }, 100);
+}
+
+function selectPrice(p, el) {
+  selectedPrice = p;
+  document.querySelectorAll('.price-btn').forEach(b => b.classList.remove('active'));
+  el.classList.add('active');
+  hapticLight();
+}
+function setRating(n) {
+  selectedRating = n;
+  hapticLight();
+  document.querySelectorAll('.star').forEach((s,i) => s.classList.toggle('on', i < n));
+}
+
+function renderDishes() {
+  document.getElementById('dishList').innerHTML = currentDishes.map((d,i)=>`
+    <div class="dish-item">
+      <span class="dish-name">🍽 ${d}</span>
+      <button class="dish-remove" onclick="removeDish(${i})">✕</button>
+    </div>`).join('');
+}
+function addDish() {
+  const inp = document.getElementById('dishInput');
+  const v = inp.value.trim();
+  if (!v) return;
+  hapticLight();
+  currentDishes.push(v);
+  inp.value = '';
+  renderDishes();
+}
+function removeDish(i) { currentDishes.splice(i,1); renderDishes(); }
+
+// ── Camera ──
+function getCameraPlugin() {
+  // Capacitor 6 : plugins disponibles sur window.Capacitor.Plugins
+  if (window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.Camera) {
+    return window.Capacitor.Plugins.Camera;
+  }
+  return null;
+}
+
+async function captureCard() {
+  const Camera = getCameraPlugin();
+  if (!Camera) {
+    // Fallback navigateur : forcer caméra
+    const inp = document.getElementById('cardInputFallback');
+    inp.setAttribute('capture', 'environment');
+    inp.value = '';
+    inp.click();
+    return;
+  }
+  try {
+    const image = await Camera.getPhoto({
+      quality: 85,
+      allowEditing: false,
+      resultType: 'dataUrl',   // CameraResultType.DataUrl
+      source: 'CAMERA',        // CameraSource.Camera
+      saveToGallery: false,
+    });
+    if (image && image.dataUrl) setCardImage(image.dataUrl);
+  } catch(e) {
+    // Annulation utilisateur — silencieux
+    const msg = e?.message || '';
+    if (!msg.includes('cancel') && !msg.includes('Cancel') && !msg.includes('No image')) {
+      showToast('Erreur caméra : ' + msg);
+    }
+  }
+}
+
+async function chooseFromLibrary() {
+  const Camera = getCameraPlugin();
+  if (!Camera) {
+    // Fallback navigateur : choisir depuis fichier
+    const inp = document.getElementById('cardInputFallback');
+    inp.removeAttribute('capture');
+    inp.value = '';
+    inp.click();
+    return;
+  }
+  try {
+    const image = await Camera.getPhoto({
+      quality: 85,
+      allowEditing: false,
+      resultType: 'dataUrl',   // CameraResultType.DataUrl
+      source: 'PHOTOS',        // CameraSource.Photos
+    });
+    if (image && image.dataUrl) setCardImage(image.dataUrl);
+  } catch(e) {
+    const msg = e?.message || '';
+    if (!msg.includes('cancel') && !msg.includes('Cancel') && !msg.includes('No image')) {
+      showToast('Erreur bibliothèque : ' + msg);
+    }
+  }
+}
+
+function removeCard() {
+  currentCard = null;
+  const preview = document.getElementById('cardPreview');
+  if (preview) preview.innerHTML = `<div class="camera-placeholder"><span class="camera-icon">📷</span><span class="camera-text">${t('scanCard')}</span></div>`;
+  const btnRm = document.getElementById('btnRemoveCard');
+  if (btnRm) btnRm.remove();
+}
+
+function setCardImage(dataUrl) {
+  currentCard = dataUrl;
+  const preview = document.getElementById('cardPreview');
+  if (preview) preview.innerHTML = `<img src="${dataUrl}" alt="carte de visite" style="max-width:100%;border-radius:8px">`;
+  // Ajouter bouton supprimer si absent
+  const actions = document.querySelector('.camera-actions');
+  if (actions && !document.getElementById('btnRemoveCard')) {
+    const btn = document.createElement('button');
+    btn.id = 'btnRemoveCard'; btn.type = 'button'; btn.className = 'cam-btn'; btn.textContent = '🗑';
+    btn.addEventListener('click', e => { e.stopPropagation(); removeCard(); });
+    actions.appendChild(btn);
+  }
+}
+
+function handleCardFallback(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = ev => setCardImage(ev.target.result);
+  reader.readAsDataURL(file);
+}
+
+// ── Geolocation ──
+async function locateMe(btn) {
+  const orig = btn.textContent;
+  btn.innerHTML = `<span class="spinner"></span>`;
+  btn.disabled = true;
+  try {
+    const pos = await getCurrentPosition();
+    document.getElementById('fLat').value = pos.coords.latitude.toFixed(6);
+    document.getElementById('fLng').value = pos.coords.longitude.toFixed(6);
+    hapticLight();
+  } catch(e) {
+    showToast(t('locError'));
+  }
+  btn.innerHTML = orig;
+  btn.disabled = false;
+}
+
+// ── Submit ──
+async function submitForm() {
+  const name = document.getElementById('fName').value.trim();
+  if (!name) { document.getElementById('fName').focus(); return; }
+  const dayKeys = ['mon','tue','wed','thu','fri','sat','sun'];
+  const menuDays = {};
+  dayKeys.forEach(d => { menuDays[d] = document.getElementById('fDay_'+d)?.checked || false; });
+
+  const data = {
+    id: editingId || Date.now().toString(),
+    name,
+    type: document.getElementById('fType').value,
+    price: selectedPrice,
+    phone: document.getElementById('fPhone').value.trim(),
+    email: document.getElementById('fEmail').value.trim(),
+    website: document.getElementById('fWebsite').value.trim(),
+    address: document.getElementById('fAddress').value.trim(),
+    lat: document.getElementById('fLat').value,
+    lng: document.getElementById('fLng').value,
+    menuDays, dishes: [...currentDishes],
+    businessCard: currentCard,
+    notes: document.getElementById('fNotes').value.trim(),
+    rating: selectedRating,
+  };
+
+  if (editingId) {
+    const idx = restaurants.findIndex(x => x.id === editingId);
+    restaurants[idx] = data;
+  } else {
+    restaurants.unshift(data);
+  }
+  await saveData();
+  closeAll();
+  renderList(); renderFilters();
+  showToast(t('saved'));
+}
+
+async function deleteResto(id) {
+  if (!confirm(t('confirmDelete'))) return;
+  restaurants = restaurants.filter(x => x.id !== id);
+  await saveData();
+  closeAll();
+  renderList(); renderFilters();
+  showToast(t('deleted'));
+}
+
+// ══════════════════════════════════════════════════
+//  UI UTILS
+// ══════════════════════════════════════════════════
+function openOverlay() { document.getElementById('overlay').classList.add('open'); }
+function closeOverlay() { document.getElementById('overlay').classList.remove('open'); }
+function closeAll() {
+  document.getElementById('formDrawer').classList.remove('open');
+  document.getElementById('detailDrawer').classList.remove('open');
+  document.getElementById('settingsDrawer').classList.remove('open');
+  closeOverlay();
+}
+function showToast(msg) {
+  const el = document.getElementById('toast');
+  el.textContent = msg; el.classList.add('show');
+  setTimeout(() => el.classList.remove('show'), 2200);
+}
+function switchTab(tab) {
+  document.getElementById('navList').classList.toggle('active', tab==='list');
+  document.getElementById('navMap').classList.toggle('active', tab==='map');
+  hapticLight();
+}
+
+// ══════════════════════════════════════════════════
+//  SETTINGS
+// ══════════════════════════════════════════════════
+function openSettings() {
+  hapticLight();
+  document.getElementById('settingsTitle').textContent = t('settings');
+  document.getElementById('settingsBody').innerHTML = `
+    <!-- À PROPOS -->
+    <div class="about-logo">
+      <div class="about-logo-text">Mes<span>Restos</span></div>
+      <div class="about-version">${t('aboutVersion')}</div>
+    </div>
+    <p class="about-desc">${t('aboutDesc')}</p>
+    <div class="about-divider"></div>
+
+    <!-- DONNÉES -->
+    <div class="settings-section">
+      <div class="settings-section-title">${t('settingsData')}</div>
+
+      <div class="settings-row" id="btnExport">
+        <div class="settings-row-left">
+          <div class="settings-row-icon green">📤</div>
+          <div class="settings-row-text">
+            <span class="settings-row-label">${t('exportData')}</span>
+            <span class="settings-row-sub">${t('exportSub')}</span>
+          </div>
+        </div>
+        <span class="settings-row-arrow">›</span>
+      </div>
+
+      <div class="settings-row" id="btnImport">
+        <div class="settings-row-left">
+          <div class="settings-row-icon blue">📥</div>
+          <div class="settings-row-text">
+            <span class="settings-row-label">${t('importData')}</span>
+            <span class="settings-row-sub">${t('importSub')}</span>
+          </div>
+        </div>
+        <span class="settings-row-arrow">›</span>
+      </div>
+
+      <div class="settings-row danger" id="btnReset">
+        <div class="settings-row-left">
+          <div class="settings-row-icon red">🗑</div>
+          <div class="settings-row-text">
+            <span class="settings-row-label">${t('resetData')}</span>
+            <span class="settings-row-sub">${i18n[lang].nRestaurants(restaurants.length)}</span>
+          </div>
+        </div>
+        <span class="settings-row-arrow">›</span>
+      </div>
+    </div>
+
+    <!-- APP -->
+    <div class="settings-section">
+      <div class="settings-section-title">${t('settingsApp')}</div>
+      <div class="settings-row" id="btnAbout">
+        <div class="settings-row-left">
+          <div class="settings-row-icon orange">ℹ️</div>
+          <div class="settings-row-text">
+            <span class="settings-row-label">${t('aboutTitle')}</span>
+            <span class="settings-row-sub">${t('aboutVersion')}</span>
+          </div>
+        </div>
+        <span class="settings-row-arrow">›</span>
+      </div>
+    </div>
+
+    <div class="about-credit">${t('aboutCredit')}</div>
+  `;
+
+  // Listeners
+  setTimeout(() => {
+    document.getElementById('btnExport')?.addEventListener('click', exportData);
+    document.getElementById('btnImport')?.addEventListener('click', () => document.getElementById('importFileInput').click());
+    document.getElementById('btnReset')?.addEventListener('click', resetData);
+    document.getElementById('btnAbout')?.addEventListener('click', showAbout);
+  }, 80);
+
+  openOverlay();
+  document.getElementById('settingsDrawer').classList.add('open');
+}
+
+function closeSettings() {
+  document.getElementById('settingsDrawer').classList.remove('open');
+  closeOverlay();
+}
+
+// ── EXPORT XLSX ──
+async function exportData() {
+  hapticLight();
+  const filename = `mesrestos_${new Date().toISOString().slice(0,10)}.xlsx`;
+  const Filesystem = window.Capacitor?.Plugins?.Filesystem;
+  const Share      = window.Capacitor?.Plugins?.Share;
+
+  try {
+    // ── Construire les données pour le tableau ──
+    const dayKeys  = ['mon','tue','wed','thu','fri','sat','sun'];
+    const dayNames = t('days'); // ['Lun','Mar',...]
+    const priceMap = {'1':'€','2':'€€','3':'€€€','4':'€€€€'};
+
+    const rows = restaurants.map(r => {
+      const menuJours = dayKeys
+        .filter(d => r.menuDays?.[d])
+        .map((d,_,__,i=dayKeys.indexOf(d)) => dayNames[dayKeys.indexOf(d)])
+        .join(', ');
+      return {
+        [lang==='fr'?'Nom':'Name']:                    r.name || '',
+        [lang==='fr'?'Type de cuisine':'Cuisine type']: r.type || '',
+        [lang==='fr'?'Tarif':'Price']:                  priceMap[r.price] || '',
+        [lang==='fr'?'Note':'Rating']:                  r.rating ? '⭐'.repeat(r.rating) : '',
+        [lang==='fr'?'Téléphone':'Phone']:              r.phone || '',
+        [lang==='fr'?'Email':'Email']:                  r.email || '',
+        [lang==='fr'?'Site web':'Website']:             r.website || '',
+        [lang==='fr'?'Adresse':'Address']:              r.address || '',
+        [lang==='fr'?'Latitude':'Latitude']:            r.lat || '',
+        [lang==='fr'?'Longitude':'Longitude']:          r.lng || '',
+        [lang==='fr'?'Jours avec menu':'Menu days']:    menuJours,
+        [lang==='fr'?'Plats préférés':'Favorite dishes']: (r.dishes||[]).join(' / '),
+        [lang==='fr'?'Notes':'Notes']:                  r.notes || '',
+      };
+    });
+
+    // ── Créer le workbook ──
+    const ws = XLSX.utils.json_to_sheet(rows);
+
+    // Largeurs colonnes auto
+    const colWidths = Object.keys(rows[0]||{}).map(k => ({
+      wch: Math.max(k.length, ...rows.map(r => String(r[k]||'').length), 12)
+    }));
+    ws['!cols'] = colWidths;
+
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, lang==='fr'?'Restaurants':'Restaurants');
+
+    // ── Générer le binaire en base64 ──
+    const wbout = XLSX.write(wb, { bookType: 'xlsx', type: 'base64' });
+
+    if (Filesystem) {
+      // Écrire sur iOS
+      await Filesystem.writeFile({
+        path: filename,
+        data: wbout,
+        directory: 'DOCUMENTS',
+        encoding: null, // base64 binaire
+      });
+
+      if (Share) {
+        const { uri } = await Filesystem.getUri({
+          path: filename,
+          directory: 'DOCUMENTS',
+        });
+        await Share.share({
+          title: 'MesRestos — Export',
+          files: [uri],
+          dialogTitle: lang==='fr'?'Partager / Sauvegarder':'Share / Save',
+        });
+      } else {
+        showToast(t('exportOk'));
+      }
+    } else {
+      // Fallback navigateur
+      XLSX.writeFile(wb, filename);
+      showToast(t('exportOk'));
+    }
+  } catch(e) {
+    console.error('Export XLSX error:', e);
+    showToast(t('exportError'));
+  }
+}
+
+// ── IMPORT ──
+function handleImportFile(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+
+  const isXlsx = file.name.endsWith('.xlsx');
+  const reader = new FileReader();
+
+  reader.onload = async ev => {
+    try {
+      let data;
+      if (isXlsx) {
+        // Lire le XLSX et reconstruire les objets restaurants
+        const wb = XLSX.read(ev.target.result, { type: 'array' });
+        const ws = wb.Sheets[wb.SheetNames[0]];
+        const rows = XLSX.utils.sheet_to_json(ws);
+        // Mapping colonnes FR/EN → objet restaurant minimal
+        data = rows.map((r, i) => ({
+          id: Date.now().toString() + i,
+          name:    r['Nom'] || r['Name'] || '',
+          type:    r['Type de cuisine'] || r['Cuisine type'] || '',
+          price:   Object.entries({'€':'1','€€':'2','€€€':'3','€€€€':'4'}).find(([k])=>k===(r['Tarif']||r['Price']))?.[1] || '',
+          rating:  (r['Note']||r['Rating']||'').length || 0,
+          phone:   r['Téléphone'] || r['Phone'] || '',
+          email:   r['Email'] || '',
+          website: r['Site web'] || r['Website'] || '',
+          address: r['Adresse'] || r['Address'] || '',
+          lat:     r['Latitude'] || '',
+          lng:     r['Longitude'] || '',
+          notes:   r['Notes'] || '',
+          dishes:  (r['Plats préférés'] || r['Favorite dishes'] || '').split(' / ').filter(Boolean),
+          menuDays:{mon:false,tue:false,wed:false,thu:false,fri:false,sat:false,sun:false},
+          businessCard: null,
+        }));
+      } else {
+        data = JSON.parse(ev.target.result);
+      }
+
+      if (!Array.isArray(data)) throw new Error('invalid');
+      if (!confirm(t('confirmImport'))) return;
+      restaurants = data;
+      await saveData();
+      renderList(); renderFilters();
+      showToast(t('importOk'));
+      closeSettings();
+    } catch(err) {
+      console.error(err);
+      showToast(t('importError'));
+    }
+  };
+
+  if (isXlsx) {
+    reader.readAsArrayBuffer(file);
+  } else {
+    reader.readAsText(file);
+  }
+  e.target.value = '';
+}
+
+// ── RESET ──
+async function resetData() {
+  if (!confirm(t('confirmReset'))) return;
+  hapticLight();
+  restaurants = [];
+  await saveData();
+  renderList(); renderFilters();
+  showToast(t('resetOk'));
+  closeSettings();
+}
+
+// ── ABOUT ──
+function showAbout() {
+  showToast(`MesRestos — ${t('aboutVersion')}`);
+}
+
+// ══════════════════════════════════════════════════
+//  INIT
+// ══════════════════════════════════════════════════
+document.getElementById('searchInput').placeholder = t('searchPlaceholder');
+loadData();
+
+// ── Fix clavier iOS ──
+// Sur iOS, quand le clavier s'ouvre, le viewport rétrécit.
+// On verrouille les éléments fixed à la bonne position via visualViewport.
+const bottomNav  = document.querySelector('.bottom-nav');
+const appHeader  = document.querySelector('.app-header');
+
+function onViewportResize() {
+  const vv = window.visualViewport;
+  if (!vv) return;
+
+  const offsetBottom = window.innerHeight - vv.height - vv.offsetTop;
+
+  // Verrouiller la largeur pour éviter l'expansion horizontale iOS
+  document.documentElement.style.width = vv.width + 'px';
+  document.body.style.width = vv.width + 'px';
+
+  // Remonter la nav du bas de la hauteur du clavier
+  bottomNav.style.transform  = `translateY(-${offsetBottom}px)`;
+  // Garder le header en place
+  appHeader.style.transform  = `translateY(${vv.offsetTop}px)`;
+
+  // Ajuster la hauteur des drawers ouverts
+  document.querySelectorAll('.drawer.open').forEach(drawer => {
+    drawer.style.maxHeight = (vv.height * 0.92) + 'px';
+    drawer.style.width = vv.width + 'px';
+  });
+}
+
+function onViewportReset() {
+  document.documentElement.style.width = '';
+  document.body.style.width = '';
+  bottomNav.style.transform  = '';
+  appHeader.style.transform  = '';
+  document.querySelectorAll('.drawer').forEach(d => {
+    d.style.maxHeight = '';
+    d.style.width = '';
+  });
+}
+
+if (window.visualViewport) {
+  window.visualViewport.addEventListener('resize', onViewportResize);
+  window.visualViewport.addEventListener('scroll', onViewportResize);
+}
+
+// Scroll l'input actif dans la zone visible du drawer
+document.addEventListener('focusin', e => {
+  if (['INPUT', 'SELECT', 'TEXTAREA'].includes(e.target.tagName)) {
+    setTimeout(() => {
+      e.target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }, 350);
+  }
+});
+
+// Reset quand le clavier se ferme (blur)
+document.addEventListener('focusout', () => {
+  setTimeout(() => {
+    if (!document.activeElement || !['INPUT','SELECT','TEXTAREA'].includes(document.activeElement.tagName)) {
+      onViewportReset();
+    }
+  }, 100);
+});
+
+</script>
+</body>
+</html>
