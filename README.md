@@ -7,3 +7,5 @@
 ![Language](https://img.shields.io/badge/language-JavaScript-yellow.svg)
 
 **Application de gestion de restaurants favoris** 🚀
+
+- ✅ Ajout du partage de la fiche HTML d'un restaurant
