@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, interactive-widget=resizes-visual">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <title>MesRestos</title>
@@ -72,7 +72,7 @@
 
   /* ── SEARCH ── */
   .search-bar { padding: 14px 16px 10px; position: relative; }
-  .search-input { width: 100%; padding: 12px 16px 12px 42px; border: 1.5px solid var(--border); border-radius: 50px; background: var(--card); font-family: 'DM Sans', sans-serif; font-size: 0.9rem; color: var(--ink); outline: none; transition: border-color 0.2s; }
+  .search-input { width: 100%; padding: 12px 16px 12px 42px; border: 1.5px solid var(--border); border-radius: 50px; background: var(--card); font-family: 'DM Sans', sans-serif; font-size: 16px; color: var(--ink); outline: none; transition: border-color 0.2s; }
   .search-input:focus { border-color: var(--accent); }
   .search-icon { position: absolute; left: 30px; top: 50%; transform: translateY(-50%); font-size: 1rem; color: var(--ink3); pointer-events: none; }
 
@@ -124,17 +124,15 @@
   .modal-overlay.open { background: rgba(30,23,18,0.5); pointer-events: all; }
 
   /* ── DRAWER ── */
-  .drawer { position: fixed; bottom: 0; left: 0; right: 0; z-index: 201; background: var(--card); border-radius: 24px 24px 0 0; box-shadow: 0 -8px 32px var(--shadow2); transform: translateY(100%); transition: transform 0.35s cubic-bezier(0.32,0.72,0,1); max-height: 92vh; display: flex; flex-direction: column;
-    /* Empêche le drawer de se redimensionner avec le clavier iOS */
-    will-change: transform;
-    -webkit-transform: translateY(100%);
-  }
+  .drawer { position: fixed; bottom: 0; left: 0; right: 0; width: 100%; max-width: 100vw; z-index: 201; background: var(--card); border-radius: 24px 24px 0 0; box-shadow: 0 -8px 32px var(--shadow2); transform: translateY(100%); transition: transform 0.35s cubic-bezier(0.32,0.72,0,1); max-height: 92dvh; display: flex; flex-direction: column; overflow: hidden; box-sizing: border-box; }
+  .drawer *, .drawer *::before, .drawer *::after { box-sizing: border-box; }
+  .drawer-body, .drawer-header { max-width: 100%; overflow-x: hidden; }
   .drawer.open { transform: translateY(0); }
   .drawer-handle { width: 36px; height: 4px; border-radius: 2px; background: var(--border); margin: 12px auto 0; }
   .drawer-header { display: flex; align-items: center; justify-content: space-between; padding: 16px 20px 12px; border-bottom: 1px solid var(--border); }
   .drawer-title { font-family: 'Playfair Display', serif; font-size: 1.2rem; font-weight: 700; }
   .btn-close { width: 32px; height: 32px; border-radius: 50%; background: var(--bg2); border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 1rem; color: var(--ink2); }
-  .drawer-body { overflow-y: auto; padding: 16px 20px; flex: 1; padding-bottom: calc(var(--safe-bottom) + 100px); }
+  .drawer-body { overflow-y: auto; overflow-x: hidden; padding: 16px 20px; flex: 1; padding-bottom: calc(var(--safe-bottom) + 100px); }
   .drawer-body::-webkit-scrollbar { width: 3px; }
   .drawer-body::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
 
@@ -143,7 +141,7 @@
   .form-section-title { font-size: 0.72rem; font-weight: 700; color: var(--ink3); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 10px; }
   .form-group { margin-bottom: 12px; }
   .form-label { display: block; font-size: 0.82rem; font-weight: 500; color: var(--ink2); margin-bottom: 5px; }
-  .form-input, .form-select, .form-textarea { width: 100%; padding: 11px 14px; border: 1.5px solid var(--border); border-radius: var(--radius-sm); background: var(--bg); font-family: 'DM Sans', sans-serif; font-size: 0.9rem; color: var(--ink); outline: none; transition: border-color 0.2s; }
+  .form-input, .form-select, .form-textarea { width: 100%; padding: 11px 14px; border: 1.5px solid var(--border); border-radius: var(--radius-sm); background: var(--bg); font-family: 'DM Sans', sans-serif; font-size: 16px; color: var(--ink); outline: none; transition: border-color 0.2s; }
   .form-input:focus, .form-select:focus, .form-textarea:focus { border-color: var(--accent); background: var(--card); }
   .form-textarea { resize: vertical; min-height: 80px; }
   .form-row { display: flex; gap: 10px; }
@@ -321,6 +319,7 @@
     <input type="text" class="search-input" id="searchInput" placeholder="Rechercher…" oninput="renderList()">
   </div>
   <div class="filter-row" id="filterRow"></div>
+  <div class="filter-row" id="sourceRow" style="display:none"></div>
   <p class="section-title" id="sectionTitle"></p>
   <div class="restaurant-list" id="restaurantList"></div>
 </main>
@@ -369,7 +368,7 @@
 <!-- Fallback file input (browser) -->
 <input type="file" id="cardInputFallback" accept="image/*" capture="environment" onchange="handleCardFallback(event)">
 <!-- Import JSON -->
-<input type="file" id="importFileInput" accept="application/json,.json,.xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" onchange="handleImportFile(event)" style="display:none">
+<input type="file" id="importFileInput" accept=".json,.xlsx,.xls,.csv,application/json,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-excel" onchange="handleImportFile(event)" style="display:none">
 
 <!-- SETTINGS DRAWER -->
 <div class="drawer" id="settingsDrawer">
@@ -482,7 +481,7 @@ const i18n = {
     save:'Enregistrer', delete:'Supprimer ce restaurant',
     confirmDelete:'Supprimer ce restaurant ?', saved:'✓ Enregistré', deleted:'✓ Supprimé',
     edit:'✏️ Modifier', openGoogle:'🗺 Google Maps', openApple:'🍎 Apple Plans',
-    rating:'Ma note', filterAll:'Tous',
+    rating:'Ma note', filterAll:'Tous', filterMine:'Les miens', filterFriends:'Mes amis',
     days:['Lun','Mar','Mer','Jeu','Ven','Sam','Dim'],
     daysLong:['Lundi','Mardi','Mercredi','Jeudi','Vendredi','Samedi','Dimanche'],
     types:['Française','Italienne','Japonaise','Américaine','Indienne','Thaï','Mexicaine','Méditerranéenne','Asiatique','Fast Food','Brasserie','Gastronomique','Autre'],
@@ -501,10 +500,11 @@ const i18n = {
     removeSamples:'Supprimer les exemples', removeSamplesSub:'Retirer les 3 restaurants de démonstration',
     confirmRemoveSamples:'Supprimer les 3 restaurants d\'exemple ?',
     removeSamplesOk:'✓ Exemples supprimés',
-    aboutTitle:'À propos', aboutVersion:'Version 1.0.0',
+    aboutTitle:'À propos', aboutVersion:'Version 1.2.0',
     aboutDesc:'Application de gestion de vos restaurants favoris. Enregistrez, organisez et retrouvez facilement vos adresses préférées.',
     aboutCredit:'Fait avec ❤️ par Michel Garlandat',
-    shareResto:'Partager cette fiche', shareText:'Partager',
+    shareResto:'Partager cette fiche', shareText:'Fiche HTML',
+    shareXLSSingle:'📊 XLS',
     sharedVia: name => `Fiche partagée depuis MesRestos — ${name}`,
     nRestaurants: n => `${n} restaurant${n>1?'s':''}`,
   },
@@ -535,7 +535,7 @@ const i18n = {
     save:'Save', delete:'Delete this restaurant',
     confirmDelete:'Delete this restaurant?', saved:'✓ Saved', deleted:'✓ Deleted',
     edit:'✏️ Edit', openGoogle:'🗺 Google Maps', openApple:'🍎 Apple Maps',
-    rating:'My rating', filterAll:'All',
+    rating:'My rating', filterAll:'All', filterMine:'Mine', filterFriends:'Friends',
     days:['Mon','Tue','Wed','Thu','Fri','Sat','Sun'],
     daysLong:['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'],
     types:['French','Italian','Japanese','American','Indian','Thai','Mexican','Mediterranean','Asian','Fast Food','Brasserie','Gastronomic','Other'],
@@ -554,10 +554,11 @@ const i18n = {
     removeSamples:'Remove sample data', removeSamplesSub:'Delete the 3 demo restaurants',
     confirmRemoveSamples:'Delete the 3 sample restaurants?',
     removeSamplesOk:'✓ Samples removed',
-    aboutTitle:'About', aboutVersion:'Version 1.0.0',
+    aboutTitle:'About', aboutVersion:'Version 1.2.0',
     aboutDesc:'Manage your favorite restaurants. Save, organize and easily find your favorite addresses.',
     aboutCredit:'Made with ❤️ by Michel Garlandat',
-    shareResto:'Share this card', shareText:'Share',
+    shareResto:'Share this card', shareText:'HTML Card',
+    shareXLSSingle:'📊 XLS',
     sharedVia: name => `Card shared from MesRestos — ${name}`,
     nRestaurants: n => `${n} restaurant${n>1?'s':''}`,
   }
@@ -613,12 +614,14 @@ let editingId = null;
 let currentDishes = [];
 let currentCard = null;
 let activeFilter = 'all';
+let sourceFilter = 'all'; // 'all' | 'mine' | source name
 let favOnly = false;
 let selectedPrice = null;
 let selectedRating = 0;
 
 async function loadData() {
   const res = await prefGet('mesrestos');
+  const flag = await prefGet('mesrestos_nosamples');
   if (res?.value) {
     restaurants = JSON.parse(res.value);
     // Migration 1 : marquer les exemples par leur ID
@@ -639,8 +642,9 @@ async function loadData() {
       }
       return r;
     });
-    await saveData(); // persister les migrations
-  } else {
+    await saveData();
+  } else if (!flag?.value) {
+    // Premier lancement seulement — pas de flag "exemples supprimés"
     restaurants = SAMPLE;
     await saveData();
   }
@@ -661,9 +665,25 @@ function renderFilters() {
     const label = tp === 'all' ? t('filterAll') : tp;
     return `<div class="filter-chip ${activeFilter===tp?'active':''}" onclick="setFilter('${tp}')">${label}</div>`;
   }).join('');
+
+  // Ligne source — visible seulement si des restos importés existent
+  const hasImported = restaurants.some(r => r.imported);
+  const sourceRowEl = document.getElementById('sourceRow');
+  if (hasImported) {
+    sourceRowEl.style.display = 'flex';
+    sourceRowEl.innerHTML = [
+      `<div class="filter-chip ${sourceFilter==='all'?'active':''}" onclick="setSourceFilter('all')">👥 ${t('filterAll')}</div>`,
+      `<div class="filter-chip ${sourceFilter==='mine'?'active':''}" onclick="setSourceFilter('mine')">👤 ${t('filterMine')}</div>`,
+      `<div class="filter-chip ${sourceFilter==='friends'?'active':''}" onclick="setSourceFilter('friends')">👥 ${t('filterFriends')}</div>`,
+    ].join('');
+  } else {
+    sourceRowEl.style.display = 'none';
+    if (sourceFilter !== 'all') sourceFilter = 'all';
+  }
 }
 
 function setFilter(f) { activeFilter = f; hapticLight(); renderFilters(); renderList(); }
+function setSourceFilter(f) { sourceFilter = f; hapticLight(); renderFilters(); renderList(); }
 
 function renderList() {
   const q = document.getElementById('searchInput').value.toLowerCase();
@@ -672,7 +692,8 @@ function renderList() {
     const matchQ = !q || r.name?.toLowerCase().includes(q) || r.type?.toLowerCase().includes(q) || r.address?.toLowerCase().includes(q);
     const matchF = activeFilter === 'all' || r.type === activeFilter;
     const matchFav = !favOnly || (r.rating >= 4);
-    return matchQ && matchF && matchFav;
+    const matchSrc = sourceFilter === 'all' || (sourceFilter === 'mine' ? !r.imported : r.imported);
+    return matchQ && matchF && matchFav && matchSrc;
   });
 
   // Trier les favoris par note décroissante
@@ -706,6 +727,7 @@ function renderList() {
           <div class="card-badges">
             ${r.price?`<span class="badge badge-price">${priceMap[r.price]||r.price}</span>`:''}
             ${hasMenu?`<span class="badge badge-menu">🗒 ${t('hasmenu')}</span>`:''}
+            ${r.imported?`<span class="badge" style="background:#e8f4fd;color:#2980b9">👥</span>`:''}
           </div>
         </div>
       </div>
@@ -714,6 +736,74 @@ function renderList() {
       </div>
     </div>`;
   }).join('');
+}
+
+// ── SHARE XLS ──
+async function shareXLS(ids) {
+  hapticLight();
+  const list = restaurants.filter(r => ids.includes(r.id));
+  if (!list.length) return;
+
+  const filename = `mesrestos_selection_${new Date().toISOString().slice(0,10)}.xlsx`;
+  const Filesystem = window.Capacitor?.Plugins?.Filesystem;
+  const Share = window.Capacitor?.Plugins?.Share;
+
+  try {
+    const dayKeys  = ['mon','tue','wed','thu','fri','sat','sun'];
+    const dayNames = t('days');
+    const priceMap = {'1':'€','2':'€€','3':'€€€','4':'€€€€'};
+
+    const rows = list.map(r => {
+      const menuJours = dayKeys
+        .filter(d => r.menuDays?.[d])
+        .map(d => dayNames[dayKeys.indexOf(d)])
+        .join(', ');
+      return {
+        [lang==='fr'?'Nom':'Name']:                     r.name || '',
+        [lang==='fr'?'Type de cuisine':'Cuisine type']:  r.type || '',
+        [lang==='fr'?'Tarif':'Price']:                   priceMap[r.price] || '',
+        [lang==='fr'?'Note':'Rating']:                   r.rating ? '⭐'.repeat(r.rating) : '',
+        [lang==='fr'?'Téléphone':'Phone']:               r.phone || '',
+        [lang==='fr'?'Email':'Email']:                   r.email || '',
+        [lang==='fr'?'Site web':'Website']:              r.website || '',
+        [lang==='fr'?'Rue':'Street']:                    r.street || '',
+        [lang==='fr'?'Ville':'City']:                    r.city || '',
+        [lang==='fr'?'Code postal':'Postal code']:       r.postalCode || '',
+        [lang==='fr'?'Pays':'Country']:                  r.country || '',
+        [lang==='fr'?'Adresse':'Address']:               r.address || '',
+        [lang==='fr'?'Latitude':'Latitude']:             r.lat || '',
+        [lang==='fr'?'Longitude':'Longitude']:           r.lng || '',
+        [lang==='fr'?'Jours avec menu':'Menu days']:     menuJours,
+        [lang==='fr'?'Plats préférés':'Favorite dishes']:(r.dishes||[]).join(' / '),
+        [lang==='fr'?'Notes':'Notes']:                   r.notes || '',
+        [lang==='fr'?'Source':'Source']:                 'ami',
+      };
+    });
+
+    const ws = XLSX.utils.json_to_sheet(rows);
+    const colWidths = Object.keys(rows[0]||{}).map(k => ({
+      wch: Math.max(k.length, ...rows.map(r => String(r[k]||'').length), 12)
+    }));
+    ws['!cols'] = colWidths;
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, 'MesRestos');
+    const wbout = XLSX.write(wb, { bookType: 'xlsx', type: 'base64' });
+
+    if (Filesystem && Share) {
+      await Filesystem.writeFile({ path: filename, data: wbout, directory: 'CACHE', encoding: null });
+      const { uri } = await Filesystem.getUri({ path: filename, directory: 'CACHE' });
+      await Share.share({
+        title: `MesRestos — ${list.length} restaurant${list.length>1?'s':''}`,
+        files: [uri],
+        dialogTitle: lang==='fr'?'Partager la sélection':'Share selection',
+      });
+    } else {
+      XLSX.writeFile(wb, filename);
+    }
+  } catch(e) {
+    console.error('Share XLS error:', e);
+    showToast(t('exportError'));
+  }
 }
 
 // ══════════════════════════════════════════════════
@@ -776,15 +866,18 @@ function openDetail(id) {
 
     <div style="display:flex;gap:8px;margin-top:4px">
       <button class="edit-btn" style="flex:1" onclick="openForm('${r.id}')">${t('edit')}</button>
-      <button class="edit-btn" id="btnShareResto" style="flex:1;background:var(--accent)" >📤 ${t('shareText')}</button>
+      <button class="edit-btn" id="btnShareResto" style="flex:1;background:var(--accent)">📤 ${t('shareText')}</button>
+      <button class="edit-btn" id="btnShareXLS" style="background:var(--bg2);color:var(--ink)">${t('shareXLSSingle')}</button>
     </div>
   `;
+  lockDrawerWidth();
   openOverlay();
   document.getElementById('detailDrawer').classList.add('open');
 
   // Listener share — après rendu
   setTimeout(() => {
     document.getElementById('btnShareResto')?.addEventListener('click', () => shareResto(r.id));
+    document.getElementById('btnShareXLS')?.addEventListener('click', () => shareXLS([r.id]));
   }, 80);
 }
 
@@ -845,7 +938,7 @@ function openForm(id) {
       </div>
       <div class="form-group">
         <label class="form-label">${t('website')}</label>
-        <input class="form-input" id="fWebsite" type="url" value="${r.website||'www.'}" placeholder="www.">
+        <input class="form-input" id="fWebsite" type="url" value="${r.website||'http://www.'}" placeholder="http://www.">
       </div>
       <div class="form-group">
         <label class="form-label">${t('rating')}</label>
@@ -886,7 +979,7 @@ function openForm(id) {
       <div class="form-row">
         <div class="form-group" style="flex:1.2">
           <label class="form-label">${t('city')}</label>
-          <input class="form-input" id="fCity" value="${r.city||''}" placeholder="Paris">
+          <input class="form-input" id="fCity" value="${r.city||'Paris'}" placeholder="Paris">
         </div>
         <div class="form-group" style="flex:0.8">
           <label class="form-label">${t('postalCode')}</label>
@@ -936,8 +1029,10 @@ function openForm(id) {
   `;
 
   renderDishes();
+  lockDrawerWidth();
   openOverlay();
   document.getElementById('formDrawer').classList.add('open');
+  setTimeout(() => { document.getElementById('formBody').scrollTop = 0; }, 50);
 
   // ── Attacher les listeners caméra APRÈS le rendu du DOM ──
   setTimeout(() => {
@@ -1169,7 +1264,7 @@ async function submitForm() {
     price: selectedPrice,
     phone: (() => { const v = document.getElementById('fPhone').value.trim(); return v === '+33' ? '' : v; })(),
     email: document.getElementById('fEmail').value.trim(),
-    website: (() => { const v = document.getElementById('fWebsite').value.trim(); return v === 'www.' ? '' : v; })(),
+    website: (() => { const v = document.getElementById('fWebsite').value.trim(); return (v === 'www.' || v === 'http://www.') ? '' : v; })(),
     // Adresse structurée
     street, city, postalCode: postal, country,
     address,  // adresse complète pour l'affichage / Maps
@@ -1205,6 +1300,14 @@ async function deleteResto(id) {
 // ══════════════════════════════════════════════════
 //  UI UTILS
 // ══════════════════════════════════════════════════
+function lockDrawerWidth() {
+  const w = document.documentElement.clientWidth + 'px';
+  document.querySelectorAll('.drawer').forEach(d => {
+    d.style.width = w;
+    d.style.maxWidth = w;
+  });
+}
+
 function openOverlay() { document.getElementById('overlay').classList.add('open'); }
 function closeOverlay() { document.getElementById('overlay').classList.remove('open'); }
 function closeAll() {
@@ -1345,6 +1448,9 @@ async function shareResto(id) {
   const googleUrl = r.lat && r.lng
     ? `https://www.google.com/maps?q=${r.lat},${r.lng}`
     : r.address ? `https://www.google.com/maps/search/${encodeURIComponent(r.address)}` : '';
+  const appleUrl = r.lat && r.lng
+    ? `https://maps.apple.com/?ll=${r.lat},${r.lng}&q=${encodeURIComponent(r.name)}`
+    : r.address ? `https://maps.apple.com/?q=${encodeURIComponent(r.address)}` : '';
 
   // ── Fiche HTML autonome ──
   const html = `<!DOCTYPE html>
@@ -1415,7 +1521,8 @@ async function shareResto(id) {
     <div class="section">
       <div class="section-title">${lang==='fr'?'Localisation':'Location'}</div>
       ${r.address?`<div class="info-row"><div class="info-icon">📍</div>${r.address}</div>`:''}
-      ${googleUrl?`<a href="${googleUrl}" class="map-btn" target="_blank">🗺 ${lang==='fr'?'Voir sur Google Maps':'Open in Google Maps'}</a>`:''}
+      ${googleUrl?`<a href="${googleUrl}" class="map-btn" target="_blank">🗺 ${lang==='fr'?'Ouvrir dans Google Maps':'Open in Google Maps'}</a>`:''}
+      ${appleUrl?`<a href="${appleUrl}" class="map-btn" target="_blank">🍎 ${lang==='fr'?'Ouvrir dans Plans':'Open in Apple Maps'}</a>`:''}
     </div>`:''}
 
     ${r.businessCard?`
@@ -1526,6 +1633,7 @@ function openSettings() {
         <span class="settings-row-arrow">›</span>
       </div>
 
+      ${restaurants.some(r => r.isSample || ['s1','s2','s3'].includes(r.id) || ['Le Petit Bistrot','Sakura Tokyo','La Trattoria'].includes(r.name)) ? `
       <div class="settings-row" id="btnRemoveSamples">
         <div class="settings-row-left">
           <div class="settings-row-icon" style="background:#fff3e0">🧹</div>
@@ -1535,7 +1643,7 @@ function openSettings() {
           </div>
         </div>
         <span class="settings-row-arrow">›</span>
-      </div>
+      </div>` : ''}
     </div>
 
     <!-- APP -->
@@ -1566,6 +1674,7 @@ function openSettings() {
   }, 80);
 
   openOverlay();
+  lockDrawerWidth();
   document.getElementById('settingsDrawer').classList.add('open');
 }
 
@@ -1610,10 +1719,10 @@ async function exportData() {
         [lang==='fr'?'Jours avec menu':'Menu days']:     menuJours,
         [lang==='fr'?'Plats préférés':'Favorite dishes']:(r.dishes||[]).join(' / '),
         [lang==='fr'?'Notes':'Notes']:                   r.notes || '',
+        [lang==='fr'?'Source':'Source']:                 'ami',
       };
     });
 
-    // ── Créer le workbook ──
     const ws = XLSX.utils.json_to_sheet(rows);
 
     // Largeurs colonnes auto
@@ -1710,6 +1819,7 @@ function handleImportFile(e) {
             dishes:    (r['Plats préférés'] || r['Favorite dishes'] || '').split(' / ').filter(Boolean),
             menuDays,
             businessCard: null,
+            imported:  (r['Source'] || r['source'] || '').toLowerCase() !== 'moi',
           };
         });
       } else {
@@ -1717,11 +1827,28 @@ function handleImportFile(e) {
       }
 
       if (!Array.isArray(data)) throw new Error('invalid');
-      if (!confirm(t('confirmImport'))) return;
-      restaurants = data;
+
+      // Fusionner en ignorant les doublons (même nom)
+      const existingNames = new Set(restaurants.map(r => r.name?.toLowerCase().trim()));
+      const newOnes = data.filter(r => r.name && !existingNames.has(r.name.toLowerCase().trim()));
+      const skipped = data.length - newOnes.length;
+
+      if (newOnes.length === 0) {
+        showToast(lang==='fr' ? `Aucun nouveau restaurant (${skipped} déjà présent${skipped>1?'s':''})` : `No new restaurant (${skipped} already exist${skipped>1?'s':''})`);
+        closeSettings();
+        return;
+      }
+
+      // Le flag imported est déjà calculé depuis la colonne Source dans le mapping XLSX
+      // Pour les JSON sans flag, on force imported:true
+      const tagged = newOnes.map(r => ({ ...r, imported: r.imported !== false ? (r.imported ?? true) : false }));
+      restaurants = [...restaurants, ...tagged];
       await saveData();
       renderList(); renderFilters();
-      showToast(t('importOk'));
+      const msg = skipped > 0
+        ? (lang==='fr' ? `✓ ${newOnes.length} importé${newOnes.length>1?'s':''}, ${skipped} doublon${skipped>1?'s':''} ignoré${skipped>1?'s':''}` : `✓ ${newOnes.length} imported, ${skipped} duplicate${skipped>1?'s':''} skipped`)
+        : t('importOk');
+      showToast(msg);
       closeSettings();
     } catch(err) {
       console.error(err);
@@ -1765,6 +1892,8 @@ async function removeSamples() {
   const removeIds = new Set(toRemove.map(r => r.id));
   restaurants = restaurants.filter(r => !removeIds.has(r.id));
   await saveData();
+  // Poser le flag pour ne plus jamais recharger les exemples
+  await prefSet('mesrestos_nosamples', 'true');
   renderList(); renderFilters();
   showToast(t('removeSamplesOk'));
   closeSettings();
@@ -1782,55 +1911,13 @@ document.getElementById('searchInput').placeholder = t('searchPlaceholder');
 loadData();
 
 // ── Fix clavier iOS ──
-// Sur iOS, quand le clavier s'ouvre, le viewport rétrécit.
-// On verrouille les éléments fixed à la bonne position via visualViewport.
-const bottomNav  = document.querySelector('.bottom-nav');
-const appHeader  = document.querySelector('.app-header');
-
-function onViewportResize() {
-  const vv = window.visualViewport;
-  if (!vv) return;
-
-  const offsetBottom = window.innerHeight - vv.height - vv.offsetTop;
-
-  // Verrouiller la largeur pour éviter l'expansion horizontale iOS
-  document.documentElement.style.width = vv.width + 'px';
-  document.body.style.width = vv.width + 'px';
-
-  // Remonter la nav du bas de la hauteur du clavier
-  bottomNav.style.transform  = `translateY(-${offsetBottom}px)`;
-  // Garder le header en place
-  appHeader.style.transform  = `translateY(${vv.offsetTop}px)`;
-
-  // Ajuster la hauteur des drawers ouverts
-  document.querySelectorAll('.drawer.open').forEach(drawer => {
-    drawer.style.maxHeight = (vv.height * 0.92) + 'px';
-    drawer.style.width = vv.width + 'px';
-  });
-}
-
-function onViewportReset() {
-  document.documentElement.style.width = '';
-  document.body.style.width = '';
-  bottomNav.style.transform  = '';
-  appHeader.style.transform  = '';
-  document.querySelectorAll('.drawer').forEach(d => {
-    d.style.maxHeight = '';
-    d.style.width = '';
-  });
-}
-
-if (window.visualViewport) {
-  window.visualViewport.addEventListener('resize', onViewportResize);
-  window.visualViewport.addEventListener('scroll', onViewportResize);
-}
-
-// Scroll l'input actif dans la zone visible du drawer
 document.addEventListener('focusin', e => {
   if (['INPUT', 'SELECT', 'TEXTAREA'].includes(e.target.tagName)) {
+    lockDrawerWidth();
     setTimeout(() => {
+      lockDrawerWidth();
       e.target.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    }, 350);
+    }, 400);
   }
 });
 
@@ -1838,10 +1925,17 @@ document.addEventListener('focusin', e => {
 document.addEventListener('focusout', () => {
   setTimeout(() => {
     if (!document.activeElement || !['INPUT','SELECT','TEXTAREA'].includes(document.activeElement.tagName)) {
-      onViewportReset();
+      lockDrawerWidth();
     }
   }, 100);
 });
+
+// ── Verrou scroll iOS ──
+// iOS peut laisser window.scrollY != 0 après caméra/clavier,
+// ce qui décale tous les position:fixed. On force scrollY=0 en permanence.
+window.addEventListener('scroll', () => {
+  if (window.scrollY !== 0) window.scrollTo(0, 0);
+}, { passive: true });
 
 </script>
 </body>
