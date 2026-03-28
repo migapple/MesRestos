@@ -1772,7 +1772,7 @@ async function exportData() {
         [lang==='fr'?'Jours avec menu':'Menu days']:     menuJours,
         [lang==='fr'?'Plats préférés':'Favorite dishes']:(r.dishes||[]).join(' / '),
         [lang==='fr'?'Notes':'Notes']:                   r.notes || '',
-        [lang==='fr'?'Source':'Source']:                 'ami',
+        [lang==='fr'?'Source':'Source']:                 r.imported ? 'ami' : 'moi',
       };
     });
 
