@@ -8,6 +8,9 @@
 
 **Application de gestion de restaurants favoris** 🚀
 
+# 1.50
+- ✅ géolocalisation n'a pas besoin d'entrer l'adresse
+
 # 1.40
 - ✅ exporte les bons propriétaires et non tous les restaurants en ami
 
